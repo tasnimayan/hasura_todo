@@ -1,15 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
+
+import { NhostProvider, useSignUpEmailPassword } from "@nhost/nextjs";
 import { nhost } from "@/lib/nhost";
+import { useRouter } from "next/navigation";
+
+function App() {
+  return (
+    <NhostProvider nhost={nhost}>
+      <SignUp />
+    </NhostProvider>
+  );
+}
 
 const SignUp: React.FC = () => {
-  const [username, setUsername] = useState<string>("");
+  // const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  // const router = useRouter();
-
-  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
 
   const handleChange =
     (setter: React.Dispatch<React.SetStateAction<string>>) =>
@@ -17,30 +26,30 @@ const SignUp: React.FC = () => {
       setter(e.target.value);
     };
 
+  const { signUpEmailPassword, isLoading } = useSignUpEmailPassword();
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!username || !email || !password) {
+    if (!email || !password) {
       return alert("Fields can not be empty");
     }
 
-    try {
-      const response = await nhost.auth.signUp({
-        email: email,
-        password: password,
-      });
-
-      console.log(response);
-
-      if (!response) {
-        // throw error;
-        alert("something went wrong");
-      }
-
-      console.log("Signed in successfully!");
-      // router.push("/todos"); // Replace with your todo list route
-    } catch (error) {
-      console.error("Sign-in error:", error);
-      // Handle errors appropriately (display error messages, etc.)
+    let response = await signUpEmailPassword(email, password);
+    console.log(response);
+    if (response.isSuccess) {
+      sessionStorage.setItem(
+        "auth",
+        JSON.stringify({
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+        })
+      );
+      alert("Verify you email with the link sent to your email!");
+      router.push("/login");
+    } else {
+      setEmail("");
+      setPassword("");
+      alert("Something went wrong");
     }
   };
 
@@ -59,16 +68,6 @@ const SignUp: React.FC = () => {
           className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96"
         >
           <div className="mb-4 flex flex-col gap-3">
-            <div className="w-full min-w-[200px]">
-              <label>Username:</label>
-              <input
-                type="text"
-                value={username}
-                onChange={handleChange(setUsername)}
-                required
-                className="h-full w-full rounded-md border border-blue-gray-200 bg-transparent px-3 py-3 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-pink-500 focus:outline-0"
-              />
-            </div>
             <div className="w-full min-w-[200px]">
               <label>Email:</label>
               <input
@@ -98,7 +97,7 @@ const SignUp: React.FC = () => {
               Sign Up
             </button>
           </div>
-          {loading && <p>Loading...</p>}
+          {isLoading && <p>Loading...</p>}
           {/* {error && <p>Error: {error.message}</p>} */}
           {/* {data && <p>User created successfully!</p>} */}
         </form>
@@ -107,4 +106,4 @@ const SignUp: React.FC = () => {
   );
 };
 
-export default SignUp;
+export default App;

@@ -1,8 +1,7 @@
-// components/Navbar.tsx
 import React from "react";
 import Link from "next/link";
 
-const Navbar: React.FC = () => {
+const NavAuth: React.FC = () => {
   return (
     <nav className=" bg-emerald-100 p-4 h-[72px]">
       <div className="flex items-center justify-between">
@@ -26,4 +25,4 @@ const Navbar: React.FC = () => {
   );
 };
 
-export default Navbar;
+export default NavAuth;

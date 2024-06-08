@@ -5,7 +5,7 @@ import React, { useState } from "react";
 
 import { NhostProvider } from "@nhost/nextjs";
 import { nhost } from "@/lib/nhost";
-import { useRouter } from "next/router";
+import { redirect, useRouter } from "next/navigation";
 
 function App() {
   return (
@@ -18,7 +18,6 @@ function App() {
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   const handleChange =
@@ -27,7 +26,7 @@ const Login: React.FC = () => {
       setter(e.target.value);
     };
 
-  const { signInEmailPassword } = useSignInEmailPassword();
+  const { signInEmailPassword, isLoading } = useSignInEmailPassword();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,7 +41,12 @@ const Login: React.FC = () => {
             refreshToken: response.refreshToken,
           })
         );
+        // router.push("/");
+        // redirect("/");
+        alert("User logges");
       }
+
+      console.log(response);
     } catch (err) {
       console.error(err);
       alert("Error creating user.");
@@ -93,7 +97,7 @@ const Login: React.FC = () => {
               Login
             </button>
           </div>
-          {loading && <p>Loading...</p>}
+          {isLoading && <p>Loading...</p>}
         </form>
       </div>
     </div>
