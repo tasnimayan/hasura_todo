@@ -1,56 +1,25 @@
-// components/AddTask.tsx
-import React, { useState } from "react";
-import { nhost } from "@/lib/nhost";
-import { gql } from "@apollo/client";
-import { toast } from "react-toastify";
+import { useQuery } from "@apollo/client";
+import { GET_CATEGORIES } from "@/app/graphql/queries";
 
-const ADD_TASK_MUTATION = gql`
-  mutation AddTask($title: String!, $dueDate: date!) {
-    insert_tasks_one(object: { title: $title, due_date: $dueDate }) {
-      id
-      title
-      due_date
-    }
-  }
-`;
+interface Category {
+  id: string;
+  title: string;
+}
+
+import React, { useState } from "react";
 
 const AddTask: React.FC = () => {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("");
-  const [dueDate, setDueDate] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [dueDate, setDueDate] = useState<string>("");
 
-  const handleAddTask = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      toast.success("please wait");
-      const variables = { title, dueDate };
-      const data = await nhost.graphql.request(ADD_TASK_MUTATION, variables);
-
-      if (data.error) {
-        setError(data.error.message);
-      } else {
-        // Clear form fields after successful submission
-        setTitle("");
-        setDueDate("");
-        console.log("Task added successfully:", data);
-      }
-    } catch (err) {
-      setError("An unexpected error occurred.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data, loading, error } = useQuery<GetCategoryQuery>(GET_CATEGORIES);
 
   return (
-    <div className="bg-white p-4 shadow rounded-lg">
+    <div className="bg-white min-w-96 p-4 shadow rounded-lg">
       <h2 className="text-xl font-semibold mb-4">Add Task</h2>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {error && <p className="text-red-500 mb-4 text-xs">Failed</p>}
       <div className="mb-4">
         <label className="block text-gray-700 mb-2" htmlFor="title">
           Title
@@ -84,15 +53,16 @@ const AddTask: React.FC = () => {
           id=""
           className="w-full p-2 border border-gray-300 rounded"
           value={category}
+          defaultValue={"default"}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             setCategory(e.target.value);
             console.log(category);
           }}
         >
-          <option value="">Default</option>
-          <option value="1">Cat 1</option>
-          <option value="2">Cat 2</option>
-          <option value="3">Cat 3</option>
+          <option value="">select category</option>
+          {data?.categories.map((item) => (
+            <option value={item.id}>{item.name}</option>
+          ))}
         </select>
       </div>
 
@@ -112,7 +82,7 @@ const AddTask: React.FC = () => {
         className={`w-full py-2 px-4 rounded text-white ${
           loading ? "bg-gray-500" : "bg-blue-500 hover:bg-blue-600"
         }`}
-        onClick={handleAddTask}
+        // onClick={handleAddTask}
         disabled={loading}
       >
         {loading ? "Adding..." : "Add Task"}

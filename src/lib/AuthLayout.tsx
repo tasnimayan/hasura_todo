@@ -1,14 +1,26 @@
-// /components/AuthLayout.tsx
-import { ReactNode } from "react";
+"use client";
+
+import "./App.css";
 import { NhostProvider } from "@nhost/nextjs";
+import { useEffect, useState } from "react";
 import { nhost } from "./nhost";
 
-interface AuthLayoutProps {
-  children: ReactNode;
+function App() {
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    setSession(nhost.auth.getSession());
+
+    nhost.auth.onAuthStateChanged((_, session) => {
+      setSession(session);
+    });
+  }, []);
+
+  return (
+    <NhostProvider nhost={nhost}>
+      {session ? <Todos session={session} /> : <SignIn />}
+    </NhostProvider>
+  );
 }
 
-const AuthLayout = ({ children }: AuthLayoutProps) => {
-  return <NhostProvider nhost={nhost}>{children}</NhostProvider>;
-};
-
-export default AuthLayout;
+export default App;

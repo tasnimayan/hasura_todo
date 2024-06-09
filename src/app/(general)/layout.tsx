@@ -1,15 +1,16 @@
 "use client";
-import { nhost } from "@/lib/nhost";
 import Navbar from "../../components/Navbar";
 import AsideNav from "./../../components/AsideNav";
 
 import { NhostProvider } from "@nhost/nextjs";
-import { NhostApolloProvider } from "@nhost/react-apollo";
+import { nhost } from "@/lib/nhost";
+import { ApolloProvider } from "@apollo/client";
+import client from "@/lib/apolloClient";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <NhostProvider nhost={nhost}>
-      <NhostApolloProvider nhost={nhost}>
+      <ApolloProvider client={client}>
         <section>
           <div className="relative gap-0 md:gap-2 xl:gap-4 xs:flex xs:flex-col md:grid md:grid-cols-[260px,1fr] grid-rows-[4rem,1fr]">
             <div className="row-span-2">
@@ -22,7 +23,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </section>
-      </NhostApolloProvider>
+      </ApolloProvider>
     </NhostProvider>
   );
 }

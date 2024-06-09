@@ -1,19 +1,5 @@
 import { gql } from "@apollo/client";
 
-export const GET_TRASHED_TASKS = gql`
-  query getTrash {
-    todos(order_by: { updated_at: asc }, where: { is_trashed: { _eq: true } }) {
-      id
-      status
-      description
-      created_at
-      category_id
-      title
-      due_date
-      is_trashed
-    }
-  }
-`;
 export const GET_CATEGORIES = gql`
   query GetCategories {
     categories(order_by: { name: asc }) {
@@ -23,28 +9,65 @@ export const GET_CATEGORIES = gql`
   }
 `;
 
-export const RECOVER_TASK_MUTATION = gql`
-  mutation RecoverTask($id: uuid!) {
-    update_tasks_by_pk(pk_columns: { id: $id }, _set: { is_trashed: false }) {
-      id
-      title
-      due_date
-      is_trashed
+export const CREATE_CATEGORY = gql`
+  mutation CreateCategory($name: String!) {
+    insert_categories(objects: { name: $name }) {
+      returning {
+        name
+        id
+      }
     }
   }
 `;
 
 export const GET_TODO_LIST = gql`
-  query getTodos {
+  query GetToDos {
     todos {
+      category {
+        name
+      }
       is_trashed
       status
-      title
       id
       due_date
+      title
       description
-      category_id
       created_at
+    }
+  }
+`;
+
+export const GET_TODO_BY_STATUS = gql`
+  query GetTodosByStatus($status: String!) {
+    todos(
+      where: { _and: { is_trashed: { _eq: false }, status: { _eq: $status } } }
+    ) {
+      category {
+        name
+      }
+      status
+      id
+      due_date
+      title
+      description
+      created_at
+      is_trashed
+    }
+  }
+`;
+
+export const DELETE_TODO = gql`
+  mutation DeleteTodos($id: Int!) {
+    delete_todos(where: { id: { _eq: $id } }) {
+      affected_rows
+    }
+  }
+`;
+
+export const DELETE_CATEGORY = gql`
+  mutation DeleteTodos($id: Int) {
+    delete_categories(where: { id: { _eq: $id } }) {
+      affected_rows
     }
   }
 `;

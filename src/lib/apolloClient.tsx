@@ -4,11 +4,12 @@ import { setContext } from "@apollo/client/link/context";
 import { nhost } from "./nhost";
 
 const httpLink = createHttpLink({
-  uri: `https://jvkuyhesklqvyxxrmbvx.hasura.ap-south-1.nhost.run/v1/graphql`,
+  uri: process.env.NEXT_PUBLIC_NHOST_URI,
 });
 
 const authLink = setContext(async (_, { headers }) => {
   const token = await nhost.auth.getAccessToken();
+  console.log("Token =========================================:", token);
   return {
     headers: {
       ...headers,

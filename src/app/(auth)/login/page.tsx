@@ -1,24 +1,15 @@
 "use client";
 
-import { useSignInEmailPassword } from "@nhost/nextjs";
 import React, { useState } from "react";
+import { useSignInEmailPassword } from "@nhost/nextjs";
 
-import { NhostProvider } from "@nhost/nextjs";
-import { nhost } from "@/lib/nhost";
 import { redirect, useRouter } from "next/navigation";
-
-function App() {
-  return (
-    <NhostProvider nhost={nhost}>
-      <Login />
-    </NhostProvider>
-  );
-}
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const router = useRouter();
+  const { signInEmailPassword, isLoading, error } = useSignInEmailPassword();
 
   const handleChange =
     (setter: React.Dispatch<React.SetStateAction<string>>) =>
@@ -26,30 +17,27 @@ const Login: React.FC = () => {
       setter(e.target.value);
     };
 
-  const { signInEmailPassword, isLoading } = useSignInEmailPassword();
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      let response = await signInEmailPassword(email, password);
-      console.log(response);
-      if (response.isSuccess) {
-        sessionStorage.setItem(
-          "auth",
-          JSON.stringify({
-            accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
-          })
-        );
-        // router.push("/");
-        // redirect("/");
-        alert("User logges");
-      }
 
-      console.log(response);
-    } catch (err) {
-      console.error(err);
-      alert("Error creating user.");
+    let response = await signInEmailPassword(email, password);
+    console.log("This is the response:", response);
+    alert(response.refreshToken);
+    if (error) {
+      console.log({ error });
+    }
+
+    if (response.isSuccess) {
+      sessionStorage.setItem(
+        "auth",
+        JSON.stringify({
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+        })
+      );
+      alert("User logged");
+      router.push("/");
+      // redirect("/");
     }
   };
 
@@ -104,4 +92,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default App;
+export default Login;
