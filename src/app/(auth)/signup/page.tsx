@@ -2,23 +2,12 @@
 
 import React, { useState } from "react";
 
-import { NhostProvider, useSignUpEmailPassword } from "@nhost/nextjs";
-import { nhost } from "@/lib/nhost";
-import { useRouter } from "next/navigation";
-
-function App() {
-  return (
-    <NhostProvider nhost={nhost}>
-      <SignUp />
-    </NhostProvider>
-  );
-}
+import { useSignUpEmailPassword } from "@nhost/nextjs";
+import { redirect } from "next/navigation";
 
 const SignUp: React.FC = () => {
-  // const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const router = useRouter();
 
   const handleChange =
     (setter: React.Dispatch<React.SetStateAction<string>>) =>
@@ -34,76 +23,89 @@ const SignUp: React.FC = () => {
       return alert("Fields can not be empty");
     }
 
-    let response = await signUpEmailPassword(email, password);
-    console.log(response);
-    if (response.isSuccess) {
+    let { accessToken, error, isSuccess } = await signUpEmailPassword(
+      email,
+      password
+    );
+
+    if (isSuccess) {
       sessionStorage.setItem(
         "auth",
         JSON.stringify({
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
+          accessToken: accessToken,
         })
       );
       alert("Verify you email with the link sent to your email!");
-      router.push("/login");
-    } else {
+      redirect("/login");
+    }
+    if (!accessToken) {
+      console.log(accessToken);
       setEmail("");
       setPassword("");
-      alert("Something went wrong");
     }
   };
 
   return (
-    <div className="flex min-h-screen mt-20 justify-center">
-      <div className="relative flex flex-col rounded-xl bg-transparent bg-clip-border text-gray-700 shadow-none">
-        <h4 className="block font-sans text-2xl text-center font-semibold leading-snug tracking-normal text-blue-gray-900 antialiased">
+    <div className="flex min-h-screen justify-center items-center">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-md">
+        <h2 className="text-2xl font-semibold text-center text-gray-900">
           Sign Up
-        </h4>
-        <p className="mt-1 block font-sans text-center text-base font-normal leading-relaxed text-gray-700 antialiased">
+        </h2>
+        <p className="text-center text-gray-700">
           Enter your details to register.
         </p>
-
-        <form
-          onSubmit={handleSubmit}
-          className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96"
-        >
-          <div className="mb-4 flex flex-col gap-3">
-            <div className="w-full min-w-[200px]">
-              <label>Email:</label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email:
+              </label>
               <input
+                id="email"
                 type="email"
                 value={email}
                 onChange={handleChange(setEmail)}
                 required
-                className="
-              h-full w-full rounded-md border border-blue-gray-200 bg-transparent px-3 py-3 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-pink-500 focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
-            <div className="w-full min-w-[200px]">
-              <label>Password:</label>
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Password:
+              </label>
               <input
+                id="password"
                 type="password"
                 minLength={8}
                 value={password}
                 onChange={handleChange(setPassword)}
                 required
-                className="h-full w-full rounded-md border border-blue-gray-200 bg-transparent px-3 py-3 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-pink-500 focus:outline-0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
             </div>
-            <button
-              type="submit"
-              className="mt-6 block w-full select-none rounded-lg bg-pink-500 py-3 px-6 text-center align-middle font-sans text-xs font-bold uppercase text-white shadow-md shadow-pink-500/20 transition-all hover:shadow-lg hover:shadow-pink-500/40 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
-            >
-              Sign Up
-            </button>
           </div>
-          {isLoading && <p>Loading...</p>}
-          {/* {error && <p>Error: {error.message}</p>} */}
-          {/* {data && <p>User created successfully!</p>} */}
+          <button
+            type="submit"
+            className={`w-full py-2 px-4 text-white rounded-md ${
+              isLoading
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-pink-500 hover:bg-pink-600 focus:ring-2 focus:ring-pink-500"
+            }`}
+            disabled={isLoading}
+          >
+            {isLoading ? "Signing Up..." : "Sign Up"}
+          </button>
+          {isLoading && <p className="text-center text-gray-500">Loading...</p>}
         </form>
       </div>
     </div>
   );
 };
 
-export default App;
+export default SignUp;

@@ -2,14 +2,14 @@
 
 import React, { useState } from "react";
 import { useSignInEmailPassword } from "@nhost/nextjs";
-
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const { signInEmailPassword, isLoading } = useSignInEmailPassword();
   const router = useRouter();
-  const { signInEmailPassword, isLoading, error } = useSignInEmailPassword();
 
   const handleChange =
     (setter: React.Dispatch<React.SetStateAction<string>>) =>
@@ -20,24 +20,29 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    let response = await signInEmailPassword(email, password);
-    console.log("This is the response:", response);
-    alert(response.refreshToken);
-    if (error) {
-      console.log({ error });
-    }
-
-    if (response.isSuccess) {
-      sessionStorage.setItem(
-        "auth",
-        JSON.stringify({
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
-        })
+    try {
+      const { isSuccess, accessToken, error } = await signInEmailPassword(
+        email,
+        password
       );
-      alert("User logged");
-      router.push("/");
-      // redirect("/");
+
+      if (error) {
+        setErrorMessage(error.message || "An error occurred");
+        return;
+      }
+
+      if (isSuccess) {
+        sessionStorage.setItem(
+          "auth",
+          JSON.stringify({
+            accessToken: accessToken,
+          })
+        );
+        router.push("/");
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      setErrorMessage("An unexpected error occurred");
     }
   };
 
@@ -82,10 +87,13 @@ const Login: React.FC = () => {
               type="submit"
               className="mt-6 block w-full select-none rounded-lg bg-green-500 py-3 px-6 text-center align-middle font-sans text-xs font-bold uppercase text-white shadow-md transition-all hover:shadow-lg hover:shadow-green-500/50 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none"
             >
-              Login
+              {isLoading ? "Logging In..." : "Login"}
             </button>
           </div>
           {isLoading && <p>Loading...</p>}
+          {errorMessage && (
+            <p className="text-red-500 text-center">{errorMessage}</p>
+          )}
         </form>
       </div>
     </div>

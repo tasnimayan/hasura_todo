@@ -1,6 +1,6 @@
 import Filter from "@/components/Filter";
 import Tasks from "@/components/Tasks";
-import { GET_TODO_BY_STATUS } from "@/app/graphql/queries";
+import { GET_TODO_BY_STATUS } from "@/graphql/queries";
 
 export default function Todos() {
   return (

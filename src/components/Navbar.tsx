@@ -1,15 +1,8 @@
 import React, { useEffect } from "react";
 import Avatar from "./Avatar";
-import { SignedIn, useAuthenticated } from "@nhost/react";
-import { redirect } from "next/navigation";
+import { SignedIn } from "@nhost/react";
 
 const Navbar: React.FC = () => {
-  // useEffect(() => {
-  //   const isAuthenticated = useAuthenticated();
-  //   if (!isAuthenticated) {
-  //     return redirect("/login");
-  //   }
-  // });
   return (
     <header className="border rounded-lg mt-2 bg-gray-100">
       <nav className="h-full flex justify-between md:justify-end items-center px-4 sm:px-6 lg:px-8">

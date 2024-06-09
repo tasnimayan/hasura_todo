@@ -1,4 +1,3 @@
-// lib/apolloClient.ts
 import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { nhost } from "./nhost";
@@ -18,9 +17,18 @@ const authLink = setContext(async (_, { headers }) => {
   };
 });
 
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
-});
+// const client = new ApolloClient({
+//   link: authLink.concat(httpLink),
+//   cache: new InMemoryCache(),
+// });
 
-export default client;
+// export default client;
+
+const createApolloClient = () => {
+  return new ApolloClient({
+    link: authLink.concat(httpLink),
+    cache: new InMemoryCache(),
+  });
+};
+
+export default createApolloClient;

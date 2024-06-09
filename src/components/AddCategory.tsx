@@ -1,18 +1,18 @@
 "use client";
 import React, { useState } from "react";
-import { CREATE_CATEGORY } from "@/app/graphql/queries";
+import { CREATE_CATEGORY } from "@/graphql/queries";
 import { useMutation } from "@apollo/client";
+import { useUserData } from "@nhost/react";
 
 const AddCategory: React.FC = () => {
   const [name, setName] = useState<string>("");
+  const { id } = useUserData();
 
-  const [createCategory, { loading, error }] = useMutation(CREATE_CATEGORY, {
-    variable: { name },
-  });
+  const [createCategory, { loading, error }] = useMutation(CREATE_CATEGORY);
 
   const handleSubmit = async () => {
     try {
-      await createCategory({ variables: { name } });
+      await createCategory({ variables: { name: name, user_id: id } });
       setName("");
     } catch (error) {
       console.error(error);

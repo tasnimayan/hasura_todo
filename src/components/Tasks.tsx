@@ -5,9 +5,9 @@ import { useQuery } from "@apollo/client";
 
 interface Todo {
   id: string;
-  due_date: string | null; // Allow null for optional fields
+  due_date: string | null;
   title: string;
-  description: string | null; // Allow null for optional fields
+  description: string | null;
   created_at?: string;
   is_trashed?: boolean;
   status: string;
@@ -24,10 +24,10 @@ interface GetTodosQuery {
 
 interface Props {
   query: string; // The GraphQL query string for data fetching
-  status?: string | null;
+  status?: string | null; // todos by the status types
 }
 
-const Tasks: React.FC<Props> = ({ query, type, status }) => {
+const Tasks: React.FC<Props> = ({ query, status }) => {
   interface ListType {
     active?: string;
     pending?: string;
@@ -42,6 +42,7 @@ const Tasks: React.FC<Props> = ({ query, type, status }) => {
   const { data, loading, error } = useQuery<GetTodosQuery>(query, {
     variables: { status },
   });
+
   if (loading) return <p>Loading...</p>;
 
   return (
@@ -55,7 +56,6 @@ const Tasks: React.FC<Props> = ({ query, type, status }) => {
       ) : null}
       <div className="flex flex-col gap-2">
         {data?.todos?.map((todo) => {
-          console.log("todo:", todo);
           return <TaskCard todo={todo} key={todo.id} />;
         })}
       </div>

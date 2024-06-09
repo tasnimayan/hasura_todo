@@ -3,22 +3,20 @@ import Link from "next/link";
 
 const NavAuth: React.FC = () => {
   return (
-    <nav className=" bg-emerald-100 p-4 h-[72px]">
+    <nav className=" bg-emerald-100 p-4 h-[3.2rem]">
       <div className="flex items-center justify-between">
         <div className="font-bold text-xl">
-          <Link href="/">Hasura ToDo</Link>
-        </div>
-        <div className="ml-10 space-x-4">
-          <Link href="/tasks" className="hover:text-gray-300">
-            My Task
-          </Link>
-          <Link href="/team" className="hover:text-gray-300">
-            My Team
-          </Link>
+          <Link href="/">Next To Do</Link>
         </div>
 
-        <div className="flex items-center justify-center w-12 h-12 border border-emerald-700 rounded-full">
-          {"TC"}
+        <div className="me-10 space-x-4">
+          <Link href="/login" className="hover:text-gray-300">
+            Sign In
+          </Link>
+          <span className="border"></span>
+          <Link href="/signup" className="hover:text-gray-300">
+            Sign Up
+          </Link>
         </div>
       </div>
     </nav>

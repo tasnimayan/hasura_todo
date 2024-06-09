@@ -1,54 +1,77 @@
+"use client";
+
 import { useMutation, useQuery } from "@apollo/client";
-import { CREATE_TODO, GET_CATEGORIES } from "@/graphql/queries";
+import { GET_TODO_BY_ID, UPDATE_TODO } from "@/graphql/queries";
 
 interface Category {
   id: string;
   name: string;
 }
 
-import React, { useState } from "react";
-import { useUserData } from "@nhost/react";
-import { GetCategoryQuery } from "@/graphql/interface";
+interface Todo {
+  id: number;
+  title: string;
+  description?: string | null;
+  due_date?: string;
+  category_id?: number | null;
+}
 
-const AddTask: React.FC = () => {
+import React, { useState, useEffect } from "react";
+import { redirect, useParams } from "next/navigation";
+
+const TodoEditForm: React.FC = () => {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
 
-  const { id } = useUserData();
+  const params = useParams();
+  const todo_id: number = params.id;
 
-  const { data } = useQuery<GetCategoryQuery>(GET_CATEGORIES);
+  const { data, loading, error } = useQuery(GET_TODO_BY_ID, {
+    variables: { id: todo_id },
+  });
+  const [updateTodo, { loading: updateLoading, error: updateError }] =
+    useMutation(UPDATE_TODO);
 
-  const [createTodo, { loading, error }] = useMutation(CREATE_TODO);
+  useEffect(() => {
+    if (data) {
+      let todos = data.todos_by_pk;
+
+      setTitle(todos.title);
+      setDescription(todos.description || "");
+      setCategory(todos.category_id || "");
+      setDueDate(todos.due_date || "");
+    }
+  }, [data]);
 
   const handleSubmit = async () => {
-    console.log(id, title, description, category, dueDate);
     try {
-      let res = await createTodo({
+      let res = await updateTodo({
         variables: {
-          title: title,
-          description: description,
+          id: todo_id,
+          title,
+          description,
           category_id: category,
           due_date: dueDate,
-          user_id: id,
         },
       });
-      if (res.data.insert_todos) {
-        setTitle("");
-        setDescription("");
-        setCategory("");
-        setDueDate("");
+      if (res?.update_todos?.affected_rows) {
+        redirect("/todos");
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.log(err);
     }
   };
 
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
   return (
     <div className="bg-white min-w-96 p-4 shadow rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Add Task</h2>
-      {error && <p className="text-red-500 mb-4 text-xs">Failed</p>}
+      <h2 className="text-xl font-semibold mb-4">Edit Task</h2>
+      {updateError && <p className="text-red-500 mb-4 text-xs">Failed</p>}
       <div className="mb-4">
         <label className="block text-gray-700 mb-2" htmlFor="title">
           Title
@@ -76,23 +99,23 @@ const AddTask: React.FC = () => {
       </div>
 
       <div className="mb-4">
-        <label className="block text-gray-700 mb-2" htmlFor="dueDate">
+        <label className="block text-gray-700 mb-2" htmlFor="category">
           Select Category
         </label>
         <select
           name="category"
-          id=""
+          id="category"
           className="w-full p-2 border border-gray-300 rounded"
           value={category}
-          defaultValue={"default"}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
             setCategory(e.target.value);
-            console.log(category);
           }}
         >
           <option value="">select category</option>
-          {data?.categories.map((item) => (
-            <option value={item.id}>{item.name}</option>
+          {data?.categories.map((item: Category) => (
+            <option key={item.id} value={item.id}>
+              {item.name}
+            </option>
           ))}
         </select>
       </div>
@@ -111,15 +134,15 @@ const AddTask: React.FC = () => {
       </div>
       <button
         className={`w-full py-2 px-4 rounded text-white ${
-          loading ? "bg-gray-500" : "bg-blue-500 hover:bg-blue-600"
+          updateLoading ? "bg-gray-500" : "bg-blue-500 hover:bg-blue-600"
         }`}
         onClick={handleSubmit}
-        disabled={loading}
+        disabled={updateLoading}
       >
-        {loading ? "Adding..." : "Add Task"}
+        {updateLoading ? "Updating..." : "Update Task"}
       </button>
     </div>
   );
 };
 
-export default AddTask;
+export default TodoEditForm;
