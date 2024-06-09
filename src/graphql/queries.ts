@@ -110,10 +110,7 @@ export const DELETE_TODO = gql`
 `;
 export const MARK_COMPLETE = gql`
   mutation MarkComplete($id: Int!) {
-    update_todos(
-      where: { id: { _eq: $id } }
-      _set: { status: "complete", is_complete: true }
-    ) {
+    update_todos(where: { id: { _eq: $id } }, _set: { status: "complete" }) {
       affected_rows
     }
   }

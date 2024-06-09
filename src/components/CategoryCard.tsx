@@ -25,7 +25,10 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
   };
 
   return (
-    <div className="flex justify-center items-center px-6 py-2 h-16 bg-white border shadow-sm rounded">
+    <div className="flex justify-end px-6 py-2 h-16 bg-white border shadow-sm rounded">
+      <div className="flex justify-center items-center">
+        <p>{category.name}</p>
+      </div>
       <div
         className="relative hover:border rounded-full w-6 h-6 flex items-center justify-center cursor-pointer active:border z-0"
         onClick={() => setIsShow(!isShow)}
@@ -73,7 +76,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
           </div>
         </div>
       </div>
-      <p>{category.name}</p>
     </div>
   );
 };
